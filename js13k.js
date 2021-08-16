@@ -8,8 +8,15 @@ let vY = 0;
 
 let thrust = 0;
 let turn = 0;
+let left = false;
+let right = false;
 
 let raf = 0;
+
+const leftThrust = document.getElementById('left');
+const rightThrust = document.getElementById('right');
+const backThrust = document.getElementById('backStart');
+const backOff = document.getElementById('backOff');
 
 window.onkeydown = event => {
     switch(event.key) {
@@ -17,13 +24,24 @@ window.onkeydown = event => {
             if (!raf) startGame();
             break;
         case " ":
-            thrust = 1;
+            if (!thrust) {
+                thrust = 1;
+                backThrust.beginElement();
+            }
             break;
         case "ArrowLeft":
-            turn = -1;
+            if (!left) {
+                turn -= 1;
+                left = true;
+                rightThrust.setAttribute('specularConstant', '1');
+            }
             break;
         case "ArrowRight":
-            turn = 1;
+            if (!right) {
+                turn += 1;
+                right = true;
+                leftThrust.setAttribute('specularConstant', '1');
+            }
             break;
     }
 };
@@ -31,11 +49,25 @@ window.onkeydown = event => {
 window.onkeyup = event => {
     switch(event.key) {
         case " ":
-            thrust = 0;
+            if (!!thrust) {
+                thrust = 0;
+                backOff.beginElement();
+            }
             break;
         case "ArrowLeft":
+            if (left) {
+                turn += 1;
+                left = false;
+                rightThrust.setAttribute('specularConstant', '.01');
+            }
+            angularV = 0;
+            break;
         case "ArrowRight":
-            turn = 0;
+            if (right) {
+                turn -= 1;
+                right = false;
+                leftThrust.setAttribute('specularConstant', '.01');
+            }
             angularV = 0;
             break;
     }
@@ -49,7 +81,7 @@ const lightTrans2 = document.getElementById('lightTrans2');
 
 const spedometer = document.getElementById('spedometer');
 
-let lastLight = document.getElementById('lastLight')
+let lastLight = document.getElementById('lastLight');
 
 const stars = [];
 
@@ -67,6 +99,7 @@ const addStar = (x, y, size, density) => {
     const newLight = document.createElementNS('http://www.w3.org/2000/svg', 'feSpecularLighting');
     newLight.setAttribute('in', 'translated');
     newLight.setAttribute('specularExponent', '20');
+    newLight.setAttribute('specularConstant', '5')
     newLight.setAttribute('surfaceScale', '15');
     newLight.setAttribute('lighting-color', color);
     const newPoint = document.createElementNS('http://www.w3.org/2000/svg', 'fePointLight');
@@ -78,7 +111,7 @@ const addStar = (x, y, size, density) => {
     newComposite.setAttribute('in', previousName);
     newComposite.setAttribute('in2', name);
     newComposite.setAttribute('operator', 'arithmetic');
-    newComposite.setAttribute('k1', '1');
+    newComposite.setAttribute('k1', '0');
     newComposite.setAttribute('k2', '1');
     newComposite.setAttribute('k3', '1');
     newComposite.setAttribute('k4', '0');
@@ -112,9 +145,9 @@ const frame = () => {
         const dx = x - star.x;
         const dy = y - star.y;
         const d = Math.sqrt(dx*dx+dy*dy);
-        if (d < star.size * 50) endGame();
+        if (d < star.size * 50 + 15) endGame();
         const dir = Math.atan2(dx, dy);
-        const force = 20 * star.size * star.density / (d*d);
+        const force = 30 * star.size * star.density / (d*d);
         vY += force * elapsed * Math.cos(dir);
         vX += force * elapsed * Math.sin(dir);
     }
@@ -122,16 +155,16 @@ const frame = () => {
     vY += thrust * .000275 * elapsed * Math.cos(rA);
     vX += thrust * .000275 * elapsed * -Math.sin(rA);
     let speed = Math.sqrt(vX*vX + vY*vY);
-    while (speed > 1) {
-        vX *= .99;
-        vY *= .99;
-        speed = Math.sqrt(vX*vX + vY*vY);
-    }
+    // while (speed > 1) {
+    //     vX *= .99;
+    //     vY *= .99;
+    //     speed = Math.sqrt(vX*vX + vY*vY);
+    // }
 
     x += -vX * elapsed;
     y += -vY * elapsed;
 
-    angularV += turn * .0025 * elapsed;
+    angularV += turn * .001 * elapsed;
     if (angularV > .5) angularV = .5;
     if (angularV < -.5) angularV = -.5;
     angle += angularV * elapsed;

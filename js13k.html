@@ -35,29 +35,55 @@
                 <filter id="lighting" x="-100" y="-100" width="200" height="200">
                     <feOffset id="lightTrans" result="translated" dx="500" dy="500"/>
 
-                    <feDiffuseLighting id="lastLight" lighting-color="#fff">
-                        <feDistantLight>
-                    </feDiffuseLighting>
+                    <feOffset id="lastLight" result="out0" dx="0" dy="0"/>
 
-                    <feGaussianBlur stdDeviation="4"/>
+                    <feColorMatrix type="saturate" values="5"/>
+                    <feGaussianBlur stdDeviation="3"/>
 
-                    <feComposite in2="translated" operator="arithmetic" k1="1" k2="0" k3="0" k4="0" />
-                    <feOffset id="lightTrans2" dx="-500" dy="-500"/>
+                    <feComposite in2="translated" operator="arithmetic" k1="2.5" k2="0" k3=".5" k4="0"/>
+                    <feOffset result="final" id="lightTrans2" dx="-500" dy="-500"/>
+                    <feComponentTransfer>
+                        <feFuncA type="table" tableValues="0 0 .16 .37 .58 .79 1" />
+                    </feComponentTransfer>
+                </filter>
+
+                <filter id="thruster" x="-50%" y="-50%" width="200%" height="200%">
+                    <feSpecularLighting in="SourceAlpha" id="left" result="left" specularConstant=".01" lighting-color="blue">
+                        <animate attributeName="specularExponent" values="1;2;1" dur="2s" repeatCount="indefinite"/>
+                        <!-- <animate attributeName="specularConstant" values=".01;2" dur="1s" fill="freeze"/> -->
+                        <feSpotLight x="-6" y="-1" z="6" limitingConeAngle="27" pointsAtX="-18" pointsAtY="-1" pointsAtZ="-11"/>
+                    </feSpecularLighting>
+                    <feSpecularLighting in="SourceAlpha" id="right" result="right" specularConstant=".01" lighting-color="blue">
+                        <animate attributeName="specularExponent" values="1;2;1" dur="2s" repeatCount="indefinite"/>
+                        <feSpotLight x="6" y="-1" z="6" limitingConeAngle="27" pointsAtX="18" pointsAtY="-1" pointsAtZ="-11"/>
+                    </feSpecularLighting>
+                    <feSpecularLighting in="SourceAlpha" result="back" specularConstant=".01" lighting-color="blue">
+                        <animate attributeName="specularExponent" values="1;4;1" dur="2s" repeatCount="indefinite"/>
+                        <animate attributeName="specularConstant" id="backStart" begin="indefinite" to="2" dur=".5s" fill="freeze"/>
+                        <animate attributeName="specularConstant" id="backOff" begin="indefinite" to=".01" dur=".5s" fill="freeze"/>
+                        <feSpotLight x="0" y="14" z="5" limitingConeAngle="45" pointsAtX="0" pointsAtY="22" pointsAtZ="-11">
+                            <animate attributeName="pointsAtX" values="0;.25;0;-.25;0" dur="250ms" repeatCount="indefinite"/>
+                        </feSpotLight>
+                    </feSpecularLighting>
+                    <feComposite in="left" in2="right" result="side" operator="arithmetic" k1="0" k2="1" k3="1" k4="0" />
+                    <feComposite in="back" in2="side" operator="arithmetic" k1="0" k2="1" k3="1" k4="0" />
+                    <feGaussianBlur stdDeviation="3"/>
+                    <feComposite in="SourceGraphic" operator="arithmetic" k1="1" k2="1" k3="1" k4="0" />
                 </filter>
 
                 <linearGradient id="shipGradient">
-                    <stop offset="0" stop-color="#fff" stop-opacity=".75" />
-                    <stop offset="40%" stop-color="#bfbfbf" stop-opacity=".99" />
-                    <stop offset="50%" stop-color="#bbb" stop-opacity="1" />
-                    <stop offset="60%" stop-color="#bfbfbf" stop-opacity=".99" />
-                    <stop offset="100%" stop-color="#fff" stop-opacity=".75" />
+                    <stop offset="0" stop-color="#888" stop-opacity=".75"/>
+                    <stop offset="40%" stop-color="#888" stop-opacity=".99"/>
+                    <stop offset="50%" stop-color="#888" stop-opacity="1"/>
+                    <stop offset="60%" stop-color="#888" stop-opacity=".99"/>
+                    <stop offset="100%" stop-color="#888" stop-opacity=".75"/>
                 </linearGradient>
             </defs>
 
             <g id="stars"></g>
 
             <g transform="translate(500 500)" filter="url(#lighting)">
-                <g id="ship">
+                <g id="ship" filter="url(#thruster)">
                     <path d="M -15 20 
                             Q -14 8 -8 8 
                             Q -16 -4 0 -20 
