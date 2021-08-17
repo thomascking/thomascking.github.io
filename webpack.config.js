@@ -1,23 +1,18 @@
 const path = require('path');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
-  entry: './src/index.ts',
-  mode: 'development',
-  devtool: 'inline-source-map',
-  module: {
-    rules: [
-      {
-        test: /\.tsx?$/,
-        use: 'ts-loader',
-        exclude: /node_modules/,
-      },
-    ],
-  },
+  entry: './src/js13k/index.js',
+  mode: 'production',
   output: {
-    filename: 'main.js',
-    path: path.resolve(__dirname, 'dist'),
+    filename: 'index.js',
+    path: path.resolve(__dirname, './js13k'),
   },
   devServer: {
-    contentBase: './dist',
+    contentBase: '.',
   },
+  plugins: [new HtmlWebpackPlugin({
+    template: './src/js13k/index.html',
+    filename: 'index.html',
+  })],
 };

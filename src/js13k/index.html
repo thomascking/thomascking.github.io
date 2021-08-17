@@ -1,5 +1,8 @@
 <!DOCTYPE html>
 <html style="padding: 0; margin: 0;">
+    <head>
+        <%= htmlWebpackPlugin.tags.headTags %>
+    </head>
     <body style="padding: 0; margin: 0; max-height: 100vh;">
         <svg viewBox="0 0 1000 1000" style="background: black; max-height: 100vh; max-width: 100vh;">
             <defs>
@@ -84,17 +87,12 @@
 
             <g transform="translate(500 500)" filter="url(#lighting)">
                 <g id="ship" filter="url(#thruster)">
-                    <path d="M -15 20 
-                            Q -14 8 -8 8 
-                            Q -16 -4 0 -20 
-                            Q 16 -4 8 8
-                            Q 14 8 15 20
-                            Q 0 10 -15 20" fill="url(#shipGradient)"/>
+                    <path d="M -15 20 Q -14 8 -8 8 Q -16 -4 0 -20 Q 16 -4 8 8 Q 14 8 15 20 Q 0 10 -15 20" fill="url(#shipGradient)"/>
                 </g>
             </g>
 
             <text id="spedometer" fill="white" x="10" y="15"></text>
         </svg>
-        <script src="./js13k.js"></script>
+        <%= htmlWebpackPlugin.tags.bodyTags %>
     </body>
 </html>
