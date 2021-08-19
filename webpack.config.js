@@ -9,7 +9,7 @@ module.exports = {
     path: path.resolve(__dirname, './js13k'),
   },
   devServer: {
-    contentBase: '.',
+    contentBase: './js13k',
   },
   plugins: [new HtmlWebpackPlugin({
     template: './src/js13k/index.html',

@@ -1,3 +1,6 @@
+import { AudioManager } from './audio-manager';
+import { loadThrust, loadTwinkle } from './audio'; 
+
 let angle = 0;
 let angularV = 0;
 
@@ -12,6 +15,7 @@ let left = false;
 let right = false;
 
 let raf = 0;
+let initialized = false;
 
 const q = id => document.getElementById(id);
 
@@ -20,15 +24,27 @@ const rightThrust = q('right');
 const backThrust = q('backStart');
 const backOff = q('backOff');
 
+let musicBuffer;loadTwinkle().then(v => musicBuffer = v);
+const audioManager = new AudioManager();
+loadThrust().then(v => audioManager.registerBuffer('thrust', v));
+
 window.onkeydown = event => {
+    if (!raf) {
+        if (event.key === 'Enter') {
+            if (!initialized) initialize();
+            startGame();
+        }
+        return;
+    }
     switch(event.key) {
         case "Enter":
-            if (!raf) startGame();
+            
             break;
         case " ":
             if (!thrust) {
                 thrust = 1;
                 backThrust.beginElement();
+                audioManager.playSfx('back', 'thrust', true);
             }
             break;
         case "ArrowLeft":
@@ -36,6 +52,7 @@ window.onkeydown = event => {
                 turn -= 1;
                 left = true;
                 setAttribute(rightThrust, 'specularConstant', '1');
+                audioManager.playSfx('right', 'thrust', true, 1, .25);
             }
             break;
         case "ArrowRight":
@@ -43,17 +60,20 @@ window.onkeydown = event => {
                 turn += 1;
                 right = true;
                 setAttribute(leftThrust, 'specularConstant', '1');
+                audioManager.playSfx('left', 'thrust', true, -1, .25);
             }
             break;
     }
 };
 
 window.onkeyup = event => {
+    if (!raf) return;
     switch(event.key) {
         case " ":
             if (!!thrust) {
                 thrust = 0;
                 backOff.beginElement();
+                audioManager.stopSfx('back');
             }
             break;
         case "ArrowLeft":
@@ -61,6 +81,7 @@ window.onkeyup = event => {
                 turn += 1;
                 left = false;
                 setAttribute(rightThrust, 'specularConstant', '.01');
+                audioManager.stopSfx('right');
             }
             angularV = 0;
             break;
@@ -69,6 +90,7 @@ window.onkeyup = event => {
                 turn -= 1;
                 right = false;
                 setAttribute(leftThrust, 'specularConstant', '.01');
+                audioManager.stopSfx('left');
             }
             angularV = 0;
             break;
@@ -190,110 +212,21 @@ const startGame = () => {
     turn = 0;
     previous = performance.now();
     frame();
-    song = audioCtx.createBufferSource();
-    song.buffer = songBuffer;
-    song.connect(audioCtx.destination);
-    song.loop = true;
-    song.start();
+};
+
+const initialize = () => {
+    initialized = true;
+    audioManager.initialize();
+    audioManager.playMusic(musicBuffer);
 };
 
 const endGame = () => {
     cancelAnimationFrame(raf);
     raf = 0;
-    song.stop();
+
+    backOff.beginElement();
+    setAttribute(rightThrust, 'specularConstant', '.01');
+    setAttribute(leftThrust, 'specularConstant', '.01');
+
+    audioManager.stopAll();
 };
-
-let song;
-let songBuffer;
-const O = new OfflineAudioContext(1, 44100 * 12, 44100);
-const audioCtx = new AudioContext();
-
-const gain = O.createGain();
-const oss = O.createOscillator();
-
-oss.connect(gain);
-gain.connect(O.destination);
-
-gain.gain.setValueAtTime(0.1, 0);
-
-oss.type = 'triangle';
-
-const C = 33;
-const D = 37;
-const E = 41;
-const F = 44;
-const G = 49;
-const A = 55;
-
-let currentTime = 0;
-
-function addNote(f, d) {
-  oss.frequency.setTargetAtTime(f, currentTime, d * 0.1);
-  oss.frequency.setTargetAtTime(0, currentTime + d * 0.8, d * 0.1);
-  currentTime += d;
-}
-oss.frequency.setValueAtTime(0, 0);
-
-const TTLS = [
-  [C, 0.25],
-  [C, 0.25],
-  [G, 0.25],
-  [G, 0.25],
-
-  [A, 0.25],
-  [A, 0.25],
-  [G, 0.5],
-
-  [F, 0.25],
-  [F, 0.25],
-  [E, 0.25],
-  [E, 0.25],
-
-  [D, 0.25],
-  [D, 0.25],
-  [C, 0.5],
-
-  [G, 0.25],
-  [G, 0.25],
-  [F, 0.25],
-  [F, 0.25],
-
-  [E, 0.25],
-  [E, 0.25],
-  [D, 0.5],
-
-  [G, 0.25],
-  [G, 0.25],
-  [F, 0.25],
-  [F, 0.25],
-
-  [E, 0.25],
-  [E, 0.25],
-  [D, 0.5],
-
-  [C, 0.25],
-  [C, 0.25],
-  [G, 0.25],
-  [G, 0.25],
-
-  [A, 0.25],
-  [A, 0.25],
-  [G, 0.5],
-
-  [F, 0.25],
-  [F, 0.25],
-  [E, 0.25],
-  [E, 0.25],
-
-  [D, 0.25],
-  [D, 0.25],
-  [C, 0.5]
-];
-
-TTLS.forEach(([f, d]) => addNote(f, d));
-
-oss.start(0);
-
-O.startRendering().then(v => {
-    songBuffer = v;
-});
