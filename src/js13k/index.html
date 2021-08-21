@@ -7,32 +7,25 @@
         <svg viewBox="0 0 1000 1000" style="background: black; max-height: 100vh; max-width: 100vh;">
             <defs>
                 <filter id="blurMe" x="-50%" y="-50%" width="200%" height="200%">
-                    <feTurbulence type="fractalNoise" seed="1" baseFrequency=".25" numOctaves="2"/>
-                    <feOffset>
-                        <animate attributeName="dx" values="-10;10;-10" dur="2s" repeatCount="indefinite"/>
-                        <animate attributeName="dy" values="-10;10;-10" dur="3s" repeatCount="indefinite"/>
-                    </feOffset>
+                    <feTurbulence type="fractalNoise" seed="1" baseFrequency=".25" numOctaves="2" result="n1"/>
 
-                    <feDisplacementMap in="SourceGraphic" xChannelSelector="R" yChannelSelector="G" scale="20" result="star"/>
+                    <feGaussianBlur stdDeviation="2"/>
 
-                    <feTurbulence baseFrequency="0.04"/>
+                    <feDisplacementMap in="SourceGraphic" in2="n1" xChannelSelector="R" yChannelSelector="G" scale="60" result="d1">
+                        <animate attributeName="scale" begin=".5s" values="60;0;60" dur="1s" repeatCount="indefinite"/>
+                    </feDisplacementMap>
 
-                    <feDiffuseLighting in="noise" lighting-color="white">
-                        <feDistantLight azimuth="45" elevation="60" />
-                        <animate attributeName="surfaceScale" values="0;6;0" dur="5s" repeatCount="indefinite"/>
-                    </feDiffuseLighting>
-                    <feOffset result="light">
-                        <animate attributeName="dx" values="-50;50;-50" dur="23s" repeatCount="indefinite"/>
-                        <animate attributeName="dy" values="-50;50;-50" dur="37s" repeatCount="indefinite"/>
-                    </feOffset>
+                    <feDisplacementMap in="d1" in2="n1" xChannelSelector="G" yChannelSelector="B" scale="60" result="star">
+                        <animate attributeName="scale" begin=".5s" values="0;60;0" dur="1s" repeatCount="indefinite"/>
+                    </feDisplacementMap>
 
                     <feComposite in="star" in2="light" operator="arithmetic" k1="1" k2="0" k3="0" k4="0"/>
 
-                    <feGaussianBlur stdDeviation="1"/>
+                    <feGaussianBlur stdDeviation="5"/>
+
                     <feComponentTransfer>
-                        <feFuncA type="linear" slope="1" intercept="0.5"/>
+                        <feFuncA type="discrete" tableValues="0 0 .25 .25 .5 .5 1" />
                     </feComponentTransfer>
-                    <feGaussianBlur stdDeviation="3"/>
                 </filter>
 
                 <filter id="lighting" x="-100" y="-100" width="200" height="200">
@@ -83,12 +76,14 @@
                 </linearGradient>
             </defs>
 
-            <g id="stars"></g>
-
             <g transform="translate(500 500)" filter="url(#lighting)">
                 <g id="ship" filter="url(#thruster)">
                     <path d="M -15 20 Q -14 8 -8 8 Q -16 -4 0 -20 Q 16 -4 8 8 Q 14 8 15 20 Q 0 10 -15 20" fill="url(#shipGradient)"/>
                 </g>
+            </g>
+
+            <g id="stars">
+                <circle cx="500" cy="500" r="2000" fill="none" stroke="red" stroke-width="100" id="playArea" />
             </g>
 
             <text id="spedometer" fill="white" x="10" y="15"></text>
