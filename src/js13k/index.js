@@ -16,6 +16,11 @@ let turn = 0;
 let left = false;
 let right = false;
 
+let score = 0;
+
+let cX = 0;
+let cY = 0;
+
 let raf = 0;
 let initialized = false;
 
@@ -29,6 +34,16 @@ const backOff = q('backOff');
 let musicBuffer;loadTwinkle().then(v => musicBuffer = v);
 const audioManager = new AudioManager();
 loadThrust().then(v => audioManager.registerBuffer('thrust', v));
+
+const randomPoint = (magnitude=1, minDist=0) => {
+    const dir = Math.random() * 2 * Math.PI;
+    const len = Math.random() * .9 * (magnitude - minDist) + minDist;
+    return [Math.sin(dir) * len, Math.cos(dir) * len];
+}
+
+const generateCheckpoint = () => {
+    [cX, cY] = randomPoint();
+}
 
 window.onkeydown = event => {
     if (!raf) {
@@ -106,14 +121,23 @@ const lightTrans = q('lightTrans');
 const lightTrans2 = q('lightTrans2');
 
 const spedometer = q('spedometer');
+const scoreEl = q('score');
+const arrow = q('arrow');
 
 let lastLight = q('lastLight');
+
+const checkpoint = q('checkpoint');
+
+const boundary = q('boundary');
+
+let boundaryRadius = 2000;
 
 const stars = [];
 
 const addStar = (x, y, size, density) => {
     const newStar = new Star(x, y, size, density);
     newStar.appendTo(starG);
+    lastLight = newStar.addLight(lastLight);
     stars.push(newStar);
     return newStar;
 };
@@ -134,10 +158,30 @@ const frame = () => {
     let elapsed = now - previous;
     previous = now;
 
+    boundaryRadius -= elapsed * .025;
+
+    const bx = x - 500;
+    const by = y - 500;
+    const db = Math.sqrt(bx*bx+by*by);
+    if (db > boundaryRadius) {
+        endGame();
+        return;
+    }
+
+    const checkX = boundaryRadius * cX;
+    const checkY = boundaryRadius * cY;
+    const cdx = bx - checkX;
+    const cdy = by - checkY;
+    const checkD = Math.sqrt(cdx*cdx+cdy*cdy);
+    if (checkD < 35) {
+        score++;
+        generateCheckpoint();
+    } 
+
     let rA = angle * Math.PI / 180;
 
-    vX -= vX * .00625;
-    vY -= vY * .00625;
+    vX -= vX * .01;
+    vY -= vY * .01;
 
     const toMerge = [];
 
@@ -145,14 +189,14 @@ const frame = () => {
         const dx = x - star.x;
         const dy = y - star.y;
         const d = Math.sqrt(dx*dx+dy*dy);
-        if (d < star.size * 50 + 15) endGame();
+        if (d < star.size * 50 + 15) {
+            endGame();
+            return;
+        }
         const dir = Math.atan2(dx, dy);
-        const force = star.mass / (d*d);
+        const force = 5 * star.mass / (d*d);
         vY += force * elapsed * Math.cos(dir);
         vX += force * elapsed * Math.sin(dir);
-
-        star.vX -= star.vX * .00625;
-        star.vY -= star.vY * .00625;
 
         stars.forEach((star2, i2) => {
             if (i === i2) return;
@@ -165,7 +209,7 @@ const frame = () => {
                 return;
             }
             const dir = Math.atan2(dx, dy);
-            const force = 10 * star2.mass / (d*d);
+            const force = star2.mass / (d*d);
             star.vY += force * elapsed * Math.cos(dir);
             star.vX += force * elapsed * Math.sin(dir);
         });
@@ -195,8 +239,8 @@ const frame = () => {
         s2.removeFrom(starG);
     }
 
-    vY += thrust * .000275 * elapsed * Math.cos(rA);
-    vX += thrust * .000275 * elapsed * -Math.sin(rA);
+    vY += thrust * .0004 * elapsed * Math.cos(rA);
+    vX += thrust * .0004 * elapsed * -Math.sin(rA);
     let speed = Math.sqrt(vX*vX + vY*vY);
 
     x += -vX * elapsed;
@@ -210,12 +254,18 @@ const frame = () => {
     setAttribute(starG, 'transform', `translate(${500-x} ${500-y})`);
     setAttribute(shipG, 'transform', `rotate(${angle})`);
     spedometer.innerHTML = `${Math.round(speed * 100)}`;
+    scoreEl.innerHTML = `${score}`;
 
     setAttribute(lightTrans, 'dx', `${x}`);
     setAttribute(lightTrans, 'dy', `${y}`);
     setAttribute(lightTrans2, 'dx', `${-x}`);
     setAttribute(lightTrans2, 'dy', `${-y}`);
+    setAttribute(boundary, 'r', `${boundaryRadius}`);
+    setAttribute(checkpoint, 'transform', `translate(${checkX} ${checkY})`);
+    setAttribute(arrow, 'transform', `translate(${clamp(500-cdx, 15, 985)} ${clamp(500-cdy, 20, 980)}) rotate(${Math.atan2(cdx, cdy) * -180 / Math.PI})`)
 };
+
+const clamp = (v, i, a) => Math.min(a, Math.max(i, v));
 
 const startGame = () => {
     x = 500;
@@ -226,12 +276,21 @@ const startGame = () => {
     angle = 0;
     thrust = 0;
     turn = 0;
+    boundaryRadius = 2000;
+    score = 0;
     left = false;
     right = false;
     clearStars();
-    addStar(0, 0, 1.5, .5);
-    addStar(1000, 200, .75, .75);
-    addStar(500, 900, .5, 1);
+    for (let i = 0; i < 7; i++) {
+        const [sX, sY] = randomPoint(2000, 400);
+        const size = Math.random() + .5;
+        const density = Math.random() * .5 + .5;
+        addStar(sX, sY, size, density);
+    }
+
+    generateCheckpoint();
+    cX = 0;
+    cY = 0;
 
     previous = performance.now();
     frame();

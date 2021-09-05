@@ -15,11 +15,9 @@
                         <animate attributeName="scale" begin=".5s" values="60;0;60" dur="1s" repeatCount="indefinite"/>
                     </feDisplacementMap>
 
-                    <feDisplacementMap in="d1" in2="n1" xChannelSelector="G" yChannelSelector="B" scale="60" result="star">
+                    <feDisplacementMap in="d1" in2="n1" xChannelSelector="G" yChannelSelector="B" scale="60">
                         <animate attributeName="scale" begin=".5s" values="0;60;0" dur="1s" repeatCount="indefinite"/>
                     </feDisplacementMap>
-
-                    <feComposite in="star" in2="light" operator="arithmetic" k1="1" k2="0" k3="0" k4="0"/>
 
                     <feGaussianBlur stdDeviation="5"/>
 
@@ -46,7 +44,6 @@
                 <filter id="thruster" x="-50%" y="-50%" width="200%" height="200%">
                     <feSpecularLighting in="SourceAlpha" id="left" result="left" specularConstant=".01" lighting-color="blue">
                         <animate attributeName="specularExponent" values="1;2;1" dur="2s" repeatCount="indefinite"/>
-                        <!-- <animate attributeName="specularConstant" values=".01;2" dur="1s" fill="freeze"/> -->
                         <feSpotLight x="-6" y="-1" z="6" limitingConeAngle="27" pointsAtX="-18" pointsAtY="-1" pointsAtZ="-11"/>
                     </feSpecularLighting>
                     <feSpecularLighting in="SourceAlpha" id="right" result="right" specularConstant=".01" lighting-color="blue">
@@ -83,10 +80,16 @@
             </g>
 
             <g id="stars">
-                <circle cx="500" cy="500" r="2000" fill="none" stroke="red" stroke-width="100" id="playArea" />
+                <circle cx="500" cy="500" r="2000" fill="none" stroke="red" stroke-width="20" id="boundary"/>
+                <circle cx="500" cy="500" r="20" fill="green" stroke="blue" stroke-width="10" id="checkpoint"/>
+            </g>
+
+            <g id="arrow">
+                <polygon points="-15,0 0,-20 15,0 5,0 5,20 -5,20 -5,0" fill="blue"/>
             </g>
 
             <text id="spedometer" fill="white" x="10" y="15"></text>
+            <text id="score" fill="white" x="10" y="25"></text>
         </svg>
         <%= htmlWebpackPlugin.tags.bodyTags %>
     </body>

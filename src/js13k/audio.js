@@ -94,7 +94,7 @@ export const loadThrust = async () => {
     const O = new OfflineAudioContext(1, 44100, 44100);
     const m = O.createBuffer(1, 44100, 44100);
     const b = m.getChannelData(0);
-    for(let i = 0; i < 44100; i++) b[i] = Math.random() * .1 - .05;
+    for(let i = 0; i < 44100; i++) b[i] = Math.random() * .05 - .025;
     const s = O.createBufferSource();
     s.buffer = m;
     s.connect(O.destination);
