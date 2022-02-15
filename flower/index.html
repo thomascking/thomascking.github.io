@@ -1,0 +1,43 @@
+<html>
+    <head>
+        <title>Flower</title>
+        <style>
+            html, body, svg {
+                max-height: 100%;
+                max-width: 100%;
+            }
+
+            body {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            svg {
+                margin: auto;
+            }
+        </style>
+    </head>
+    <body>
+        <svg viewBox="0 0 100 100">
+            <path fill="blue" fill-rule="nonzero" fill-opacity="0" stroke="black" stroke-dasharray="1000" d="M50 50 
+                Q70 90, 50 99 Q30 90, 50 50
+                Q81 47, 83 83 Q47 81, 50 50
+                Q90 30, 99 50 Q90 70, 50 50
+                Q47 19, 83 17 Q81 47, 50 50
+                Q30 10, 50 1  Q70 10, 50 50
+                Q19 47, 17 17 Q53 19, 50 50
+                Q10 70, 1  50 Q10 30, 50 50
+                Q53 81, 17 83 Q19 47, 50 50Z">
+                <animate attributeName="stroke-dashoffset" values="1000;0" dur="6s"/>
+                <animate attributeName="fill-opacity" values="0;1" begin="6s" dur="4s" fill="freeze" />
+            </path>
+            <circle cx="50" cy="50" fill="yellow" stroke="none">
+                <animate attributeName="r" values="0;5" begin="12s" dur="1s" fill="freeze" />
+            </circle>
+            <circle cx="50" cy="50" r="5" fill="none" stroke="black" stroke-dasharray="50%" stroke-dashoffset="50%">
+                <animate attributeName="stroke-dashoffset" begin="10s" values="50%;0%" dur="2s" fill="freeze"/>
+            </circle>
+        </svg>
+    </body>
+</html>
