@@ -1,9 +1,53 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Thomas King</title>
-    </head>
-    <body>
-        <a href="/js13k">js13k</a>
-    </body>
+
+<head>
+</head>
+
+<body>
+  <form name="diceForm">
+    <input name="dice" value="1" type="number" step="1" min="1">
+    <label>d</label>
+    <input name="sides" value="20" type="number" step="1" min="2">
+    <button>ROLL!</button>
+  </form>
+
+  <div id="results"></div>
+
+  <script>
+
+    const removeAll = node => {
+      while (node.firstChild) {
+        node.removeChild(node.firstChild);
+      }
+    };
+
+    const createDie = value => {
+      const tag = document.createElement('p');
+      tag.innerHTML = value;
+      return tag;
+    }
+
+    const roll = sides => Math.floor(Math.random() * sides) + 1;
+
+    const results = document.getElementById('results');
+    const form = document.forms.diceForm;
+
+    form.addEventListener('submit', event => {
+      event.preventDefault();
+      removeAll(results);
+      const dice = parseInt(form.dice.value);
+      const sides = parseInt(form.sides.value);
+      let sum = 0;
+      for (let i = 0; i < dice; i++) {
+        const value = roll(sides);
+        results.appendChild(createDie(value));
+        sum += value;
+      }
+      results.appendChild(createDie(`Sum: ${sum}`));
+    });
+
+  </script>
+</body>
+
 </html>
